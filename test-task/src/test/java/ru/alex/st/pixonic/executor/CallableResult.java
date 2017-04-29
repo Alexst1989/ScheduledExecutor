@@ -7,13 +7,16 @@ public class CallableResult {
 	private String stringResult;
 
 	private LocalDateTime startTime;
+	
+	private LocalDateTime scheduleTime;
 
 	private LocalDateTime finishTime;
 
-	public CallableResult(String stringResult, LocalDateTime startTime, LocalDateTime finishTime) {
+	public CallableResult(String stringResult, LocalDateTime scheduleTime, LocalDateTime startTime, LocalDateTime finishTime) {
 		this.stringResult = stringResult;
 		this.startTime = startTime;
 		this.finishTime = finishTime;
+		this.setScheduleTime(scheduleTime);
 	}
 
 	public String getStringResult() {
@@ -38,6 +41,14 @@ public class CallableResult {
 
 	public void setFinishTime(LocalDateTime finishTime) {
 		this.finishTime = finishTime;
+	}
+
+	public LocalDateTime getScheduleTime() {
+		return scheduleTime;
+	}
+
+	public void setScheduleTime(LocalDateTime scheduleTime) {
+		this.scheduleTime = scheduleTime;
 	}
 
 }

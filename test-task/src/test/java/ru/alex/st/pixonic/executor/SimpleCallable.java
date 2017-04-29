@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class SimpleCallable implements Callable<String> {
+public class SimpleCallable implements Callable<CallableResult> {
 
 	private static final Logger LOGGER = LogManager.getLogger(SimpleCallable.class);
 
@@ -23,7 +23,7 @@ public class SimpleCallable implements Callable<String> {
 	}
 
 	@Override
-	public String call() throws Exception {
+	public CallableResult call() throws Exception {
 		LocalDateTime now = LocalDateTime.now();
 		LOGGER.debug(String.format("[Thread id: %s, taskId:%s current time: %s, task time:%s]",
 		                Thread.currentThread().getId(), taskId, now, taskTime));
@@ -33,7 +33,8 @@ public class SimpleCallable implements Callable<String> {
 			LOGGER.error(ex);
 		}
 		LOGGER.debug(String.format("Thread with id = %s has finished", Thread.currentThread().getId()));
-		return String.format("Callable with id %s finished", taskId);
+		CallableResult result = new CallableResult(String.format("Callable with id %s finished", taskId), taskTime, now, LocalDateTime.now());
+		return result;
 	}
 
 }

@@ -24,7 +24,7 @@ public class TaskDataProvider {
 	 * 
 	 * @return
 	 */
-	public static Task<String> getRandomTaskForDay() {
+	public static Task<CallableResult> getRandomTaskForDay() {
 		LocalDateTime now = LocalDateTime.now();
 		LocalDateTime date = LocalDateTime.of(now.getYear(), 
 						now.getMonthValue(), 
@@ -33,8 +33,8 @@ public class TaskDataProvider {
 						(int) (Math.random() * 60),
 						(int) (Math.random() * 60),
 						(int) (Math.random() * 1000));
-		Callable<String> callable = new SimpleCallable(date);
-		return new Task<String>(date, callable);
+		Callable<CallableResult> callable = new SimpleCallable(date);
+		return new Task<CallableResult>(date, callable);
 	}
 	
 	/**
@@ -42,7 +42,7 @@ public class TaskDataProvider {
 	 * 
 	 * @return
 	 */
-	public static Task<String> getRandomTaskForMinute() {
+	public static Task<CallableResult> getRandomTaskForMinute() {
 		LocalDateTime now = LocalDateTime.now();
 		LocalDateTime date = LocalDateTime.of(now.getYear(), 
 						now.getMonthValue(), 
@@ -51,8 +51,8 @@ public class TaskDataProvider {
 						now.getMinute(),
 						(int) (Math.random() * 60),
 						(int) (Math.random() * 1000));
-		Callable<String> callable = new SimpleCallable(date);
-		return new Task<String>(date, callable);
+		Callable<CallableResult> callable = new SimpleCallable(date);
+		return new Task<CallableResult>(date, callable);
 	}
 	
 }
