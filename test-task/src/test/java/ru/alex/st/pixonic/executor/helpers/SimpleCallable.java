@@ -1,4 +1,4 @@
-package ru.alex.st.pixonic.executor;
+package ru.alex.st.pixonic.executor.helpers;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.Callable;
@@ -15,25 +15,25 @@ public class SimpleCallable implements Callable<CallableResult> {
 	
 	private int taskId;
 
-	private LocalDateTime taskTime;
+	private LocalDateTime scheduledTime;
 
 	public SimpleCallable(LocalDateTime dateTime) {
 		this.taskId = counter.incrementAndGet();
-		this.taskTime = dateTime;
+		this.scheduledTime = dateTime;
 	}
 
 	@Override
 	public CallableResult call() throws Exception {
-		LocalDateTime now = LocalDateTime.now();
-		LOGGER.debug(String.format("[Thread id: %s, taskId:%s current time: %s, task time:%s]",
-		                Thread.currentThread().getId(), taskId, now, taskTime));
+		LocalDateTime start = LocalDateTime.now();
+		LOGGER.debug(String.format("[taskId:%s StartTime: %s, Scheduled:%s, currentAfterScheduled=%b]",
+		                taskId, start, scheduledTime, start.isAfter(scheduledTime)));
 		try {
-			Thread.sleep((int) Math.random() * 5000);
+			Thread.sleep((int) (Math.random() * 1000));
 		} catch (InterruptedException ex) {
 			LOGGER.error(ex);
 		}
-		LOGGER.debug(String.format("Thread with id = %s has finished", Thread.currentThread().getId()));
-		CallableResult result = new CallableResult(String.format("Callable with id %s finished", taskId), taskTime, now, LocalDateTime.now());
+		LOGGER.trace(String.format("Thread with id = %s has finished", Thread.currentThread().getId()));
+		CallableResult result = new CallableResult(String.format("Callable with id %s finished", taskId), taskId, scheduledTime, start, LocalDateTime.now());
 		return result;
 	}
 

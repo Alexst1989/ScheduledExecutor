@@ -18,7 +18,7 @@ public class TaskTest {
 		Task<String> previous = null;
 		while (queue.size() != 0) {
 			Task<String> current = queue.poll();
-			if (previous != null) Assert.assertEquals(true, current.getDateTime().isAfter(previous.getDateTime()));
+			if (previous != null) Assert.assertEquals(true, current.getScheduledTime().isAfter(previous.getScheduledTime()));
 			previous = current;
 		}			
 	}

@@ -1,10 +1,12 @@
-package ru.alex.st.pixonic.executor;
+package ru.alex.st.pixonic.executor.helpers;
 
 import java.time.LocalDateTime;
 
 public class CallableResult {
 
 	private String stringResult;
+	
+	private int taskId;
 
 	private LocalDateTime startTime;
 	
@@ -12,11 +14,12 @@ public class CallableResult {
 
 	private LocalDateTime finishTime;
 
-	public CallableResult(String stringResult, LocalDateTime scheduleTime, LocalDateTime startTime, LocalDateTime finishTime) {
+	public CallableResult(String stringResult, int taskId, LocalDateTime scheduleTime, LocalDateTime startTime, LocalDateTime finishTime) {
 		this.stringResult = stringResult;
 		this.startTime = startTime;
 		this.finishTime = finishTime;
-		this.setScheduleTime(scheduleTime);
+		this.scheduleTime = scheduleTime;
+		this.taskId = taskId;
 	}
 
 	public String getStringResult() {
@@ -49,6 +52,14 @@ public class CallableResult {
 
 	public void setScheduleTime(LocalDateTime scheduleTime) {
 		this.scheduleTime = scheduleTime;
+	}
+
+	public int getTaskId() {
+		return taskId;
+	}
+
+	public void setTaskId(int taskId) {
+		this.taskId = taskId;
 	}
 
 }
