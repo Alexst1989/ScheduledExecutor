@@ -28,6 +28,11 @@ public class TaskDataProvider {
 		return getDataWithEqualTime(100);
 	}
 	
+	@DataProvider(name="taskDataProviderEqualTime1000")
+	public Object[][] getDatawithEqualTime1000() {
+		return getDataWithEqualTime(1000);
+	}
+	
 	public Object[][] getData(int size) {
 		List<TaskData<CallableResult>> taskList = new LinkedList<>();
 		for (int i = 0; i < size; i++) taskList.add(getRandomTaskForMinute());

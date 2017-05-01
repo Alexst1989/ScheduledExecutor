@@ -28,13 +28,18 @@ public class SimpleCallable implements Callable<CallableResult> {
 		LOGGER.debug(String.format("[taskId:%s StartTime: %s, Scheduled:%s, currentAfterScheduled=%b]",
 		                taskId, start, scheduledTime, start.isAfter(scheduledTime)));
 		try {
-			Thread.sleep((int) (Math.random() * 1000));
+//			Thread.sleep((int) (Math.random() * 1000));
+			Thread.sleep((int) (Math.random() * 0));
 		} catch (InterruptedException ex) {
 			LOGGER.error(ex);
 		}
 		LOGGER.trace(String.format("Thread with id = %s has finished", Thread.currentThread().getId()));
 		CallableResult result = new CallableResult(String.format("Callable with id %s finished", taskId), taskId, scheduledTime, start, LocalDateTime.now());
 		return result;
+	}
+
+	public int getTaskId() {
+		return taskId;
 	}
 
 }

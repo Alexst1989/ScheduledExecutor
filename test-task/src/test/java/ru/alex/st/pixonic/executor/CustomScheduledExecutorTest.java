@@ -16,11 +16,11 @@ import ru.alex.st.pixonic.executor.helpers.TaskData;
 
 public class CustomScheduledExecutorTest {
 				
-	private CustomScheduledExecutor<CallableResult> scheduledTaskExecutor;
+	private CustomScheduledExecutor2<CallableResult> scheduledTaskExecutor;
 	
 	@BeforeClass
 	private void beforeClass() {
-		scheduledTaskExecutor = CustomScheduledExecutor.getCustomScheduledExecutor();
+		scheduledTaskExecutor = CustomScheduledExecutor2.getCustomScheduledExecutor();
 	}
 	
 	@AfterClass

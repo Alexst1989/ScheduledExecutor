@@ -6,7 +6,7 @@ public class CallableResult {
 
 	private String stringResult;
 	
-	private int taskId;
+	private Integer taskId;
 
 	private LocalDateTime startTime;
 	
@@ -54,7 +54,7 @@ public class CallableResult {
 		this.scheduleTime = scheduleTime;
 	}
 
-	public int getTaskId() {
+	public Integer getTaskId() {
 		return taskId;
 	}
 

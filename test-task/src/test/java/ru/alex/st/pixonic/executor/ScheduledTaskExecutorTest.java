@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import junit.framework.Assert;
 import ru.alex.st.pixonic.executor.helpers.CallableResult;
+import ru.alex.st.pixonic.executor.helpers.SimpleCallable;
 import ru.alex.st.pixonic.executor.helpers.TaskData;
 
 public class ScheduledTaskExecutorTest {
@@ -49,8 +50,7 @@ public class ScheduledTaskExecutorTest {
 		}
 	}
 
-	// @Test(dataProvider = "taskDataProvider100", dataProviderClass =
-	// TaskDataProvider.class, threadPoolSize=10)
+//	@Test(dataProvider = "taskDataProvider100", dataProviderClass = TaskDataProvider.class, threadPoolSize = 10)
 	public void testConcurrentAdding(List<TaskData<CallableResult>> taskList)
 	                throws InterruptedException, ExecutionException {
 		for (TaskData<CallableResult> task : taskList) {
@@ -66,9 +66,12 @@ public class ScheduledTaskExecutorTest {
 		}
 	}
 
-	@Test(dataProvider = "taskDataProviderEqualTime100", dataProviderClass = TaskDataProvider.class)
+	@Test(dataProvider = "taskDataProviderEqualTime1000", dataProviderClass = TaskDataProvider.class)
 	public void testExecutionOrder(List<TaskData<CallableResult>> taskList)
 	                throws InterruptedException, ExecutionException {
+		
+		checkData(taskList);
+		
 		for (TaskData<CallableResult> task : taskList) {
 			scheduledTaskExecutor.addTask(task.getLocalDateTime(), task.getCallable());
 		}
@@ -78,13 +81,25 @@ public class ScheduledTaskExecutorTest {
 		}
 		CallableResult previous = null;
 		resultList.sort((o1, o2) -> {
-			return o1.getStartTime().compareTo(o2.getStartTime());
+			//return o1.getStartTime().compareTo(o2.getStartTime());
+			return o1.getTaskId().compareTo(o2.getTaskId());
 		});
 		for (CallableResult result : resultList) {
-			System.out.println(String.format("taskId:%s	startTime:%s	scheduled:%s", result.getTaskId(), result.getStartTime(), result.getScheduleTime()));
+			System.out.println(String.format("taskId:%s	startTime:%s	scheduled:%s", result.getTaskId(),
+			                result.getStartTime(), result.getScheduleTime()));
 			if (previous != null)
-				Assert.assertEquals(true, result.getTaskId() > previous.getTaskId());
+				Assert.assertEquals(true, result.getStartTime().isEqual(previous.getStartTime()) 
+								|| result.getStartTime().isAfter(previous.getStartTime()));
 			previous = result;
+		}
+	}
+
+	private void checkData(List<TaskData<CallableResult>> taskList) {
+		SimpleCallable previous = null;
+		for (TaskData<CallableResult> task : taskList) {
+			if (previous != null)
+				Assert.assertEquals(true, ((SimpleCallable) task.getCallable()).getTaskId() > previous.getTaskId());
+			previous = (SimpleCallable) task.getCallable();
 		}
 	}
 

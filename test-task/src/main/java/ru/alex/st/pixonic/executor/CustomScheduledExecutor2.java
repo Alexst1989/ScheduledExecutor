@@ -17,9 +17,9 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class CustomScheduledExecutor<T> implements Runnable {
+public class CustomScheduledExecutor2<T> implements Runnable {
 
-	private static final Logger LOGGER = LogManager.getLogger(CustomScheduledExecutor.class);
+	private static final Logger LOGGER = LogManager.getLogger(CustomScheduledExecutor2.class);
 
 	private PriorityBlockingQueue<Task<T>> inQueue = new PriorityBlockingQueue<>();
 
@@ -35,7 +35,7 @@ public class CustomScheduledExecutor<T> implements Runnable {
 
 	private Thread mainThread;
 
-	private CustomScheduledExecutor(ExecutorService executor, Queue<Future<T>> outQueue) {
+	private CustomScheduledExecutor2(ExecutorService executor, Queue<Future<T>> outQueue) {
 		this.executor = executor;
 		this.outQueue = outQueue;
 		mainThread = new Thread(this);
@@ -45,8 +45,6 @@ public class CustomScheduledExecutor<T> implements Runnable {
 	public void addTask(LocalDateTime dateTime, Callable<T> callable) {
 		inQueue.offer(new Task<T>(dateTime, LocalDateTime.now(), callable));
 		lock.lock();
-		while (!mainThread.isAlive()) {
-		}
 		try {
 			condition.signal();
 		} finally {
@@ -98,10 +96,10 @@ public class CustomScheduledExecutor<T> implements Runnable {
 		return outQueue;
 	}
 
-	public static <E> CustomScheduledExecutor<E> getCustomScheduledExecutor() {
+	public static <E> CustomScheduledExecutor2<E> getCustomScheduledExecutor() {
 		Queue<Future<E>> outQueue = new LinkedList<>();
 		ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 3);
-		CustomScheduledExecutor<E> executor = new CustomScheduledExecutor<>(executorService, outQueue);
+		CustomScheduledExecutor2<E> executor = new CustomScheduledExecutor2<>(executorService, outQueue);
 		return executor;
 	}
 
