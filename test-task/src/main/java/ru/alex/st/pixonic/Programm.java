@@ -50,8 +50,8 @@ public class Programm {
 		executor.addTask(task2.getLocalDateTime(), task2.getCallable());
 		executor.addTask(task3.getLocalDateTime(), task3.getCallable());
 
-		Queue<ScheduledFuture<CallableResult>> outQueue = executor.getOutQueue(); 
 		//Вывод результатов выполнения заданий
+		Queue<ScheduledFuture<CallableResult>> outQueue = executor.getOutQueue(); 
 		LinkedList<CallableResult> results = new LinkedList<>();
 		while (!outQueue.isEmpty()) {
 			ScheduledFuture<CallableResult> future = outQueue.poll();
