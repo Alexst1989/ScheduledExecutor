@@ -28,8 +28,8 @@ public class SimpleCallable implements Callable<CallableResult> {
 		LOGGER.debug(String.format("[taskId:%s StartTime: %s, Scheduled:%s, currentAfterScheduled=%b]",
 		                taskId, start, scheduledTime, start.isAfter(scheduledTime)));
 		try {
-//			Thread.sleep((int) (Math.random() * 1000));
-			Thread.sleep((int) (Math.random() * 0));
+			Thread.sleep((int) (Math.random() * 1000));
+//			Thread.sleep((int) (Math.random() * 0));
 		} catch (InterruptedException ex) {
 			LOGGER.error(ex);
 		}
