@@ -7,7 +7,6 @@ import java.util.List;
 import org.testng.annotations.DataProvider;
 
 import ru.alex.st.pixonic.executor.helpers.CallableResult;
-import ru.alex.st.pixonic.executor.helpers.TaskDataFactory;
 
 public class TaskDataProvider {
 	

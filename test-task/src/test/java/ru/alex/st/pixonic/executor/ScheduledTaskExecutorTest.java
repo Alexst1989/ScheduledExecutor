@@ -54,27 +54,30 @@ public class ScheduledTaskExecutorTest {
         final int taskNumber = taskList.size();
         for (TaskData<CallableResult> task : taskList) {
             scheduledTaskExecutor.addTask(task.getLocalDateTime(), task.getCallable());
-//            Thread.sleep(1);
         }
         LinkedList<CallableResult> resultList = new LinkedList<>();
         BlockingQueue<CallableResult> outQueue = scheduledTaskExecutor.getOutQueue();
-        
+
         int completedTasks = 0;
-        while(completedTasks < taskNumber) {
+        while (completedTasks < taskNumber) {
             resultList.add(outQueue.take());
             completedTasks++;
         }
         CallableResult previous = null;
         resultList.sort((o1, o2) -> {
-            // return o1.getStartTime().compareTo(o2.getStartTime());
-            return o1.getTaskId().compareTo(o2.getTaskId());
+            return o1.getCreationTime().compareTo(o2.getCreationTime());
         });
         for (CallableResult result : resultList) {
-            System.out.println(String.format("taskId:%s startTime:%s creationTime:%s scheduled:%s", result.getTaskId(),
+            System.out.println(String.format("taskId:%s startTime:%s creationTime=%s scheduled:%s", result.getTaskId(),
                             result.getStartTime(), result.getCreationTime(), result.getScheduleTime()));
-            if (previous != null)
+            if (previous != null) {
                 Assert.assertEquals(true, result.getStartTime().isEqual(previous.getStartTime())
                                 || result.getStartTime().isAfter(previous.getStartTime()));
+                Assert.assertEquals(true, result.getCreationTime().isEqual(previous.getCreationTime())
+                                || result.getCreationTime().isAfter(previous.getCreationTime()));
+            }
+            Assert.assertEquals(true, result.getScheduleTime().isBefore(result.getStartTime())
+                            || result.getScheduleTime().isEqual(result.getStartTime()));
             previous = result;
         }
     }

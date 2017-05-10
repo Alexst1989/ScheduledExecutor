@@ -1,23 +1,9 @@
 package ru.alex.st.pixonic;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledFuture;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import ru.alex.st.pixonic.executor.ScheduledTaskExecutor;
-import ru.alex.st.pixonic.executor.TaskData;
-import ru.alex.st.pixonic.executor.helpers.CallableResult;
-import ru.alex.st.pixonic.executor.helpers.SimpleCallable;
-import ru.alex.st.pixonic.executor.helpers.TaskDataFactory;
 
 /*
  * Условие:

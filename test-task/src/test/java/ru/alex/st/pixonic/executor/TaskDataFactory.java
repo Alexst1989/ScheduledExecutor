@@ -1,9 +1,10 @@
-package ru.alex.st.pixonic.executor.helpers;
+package ru.alex.st.pixonic.executor;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.Callable;
 
-import ru.alex.st.pixonic.executor.TaskData;
+import ru.alex.st.pixonic.executor.helpers.CallableResult;
+import ru.alex.st.pixonic.executor.helpers.SimpleCallable;
 
 public class TaskDataFactory {
 

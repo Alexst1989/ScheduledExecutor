@@ -1,8 +1,6 @@
 package ru.alex.st.pixonic.executor;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.DelayQueue;
@@ -19,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import ru.alex.st.pixonic.Programm;
+import ru.alex.st.pixonic.executor.helpers.SimpleCallable;
 
 /**
  * From documentation about ScheduledThreadPoolExecutor
@@ -45,7 +44,6 @@ public class ScheduledTaskExecutor<T> implements Runnable {
     private AtomicInteger taskCounter = new AtomicInteger(0);
     private int maxTasks;
     private ReentrantLock lock = new ReentrantLock();
-    private Set<Thread> parentThreads = new HashSet<>();
 
     private ScheduledTaskExecutor(int maxTasks) {
         this.maxTasks = maxTasks;
@@ -55,7 +53,6 @@ public class ScheduledTaskExecutor<T> implements Runnable {
 //        lock.lock();
 //        try {
             delayQueue.offer(new Task<>(dateTime, LocalDateTime.now(), callable));
-            parentThreads.add(Thread.currentThread());
 //        } finally {
 //            lock.unlock();
 //        }
@@ -93,7 +90,14 @@ public class ScheduledTaskExecutor<T> implements Runnable {
                 priorityQueue.offer(firstAvailable);
                 while (priorityQueue.size() > 0) {
                     LOGGER.trace("task:{} priorityQueue.size:{}", priorityQueue.peek(), priorityQueue.size());
-                    Future<T> future = executor.submit(priorityQueue.poll().getCallable());
+                    Task<T> task = priorityQueue.poll();
+                    Callable<T> call = task.getCallable();
+                    if (call instanceof SimpleCallable) { //For testing and debugging
+                        SimpleCallable simpleCall = (SimpleCallable) call;
+                        simpleCall.setCreationTime(task.getCreationTime());
+                    }
+                    Future<T> future = executor.submit(call);
+                    
                     outQueue.add(future.get());
                 }
             } catch (InterruptedException | ExecutionException ex) {
