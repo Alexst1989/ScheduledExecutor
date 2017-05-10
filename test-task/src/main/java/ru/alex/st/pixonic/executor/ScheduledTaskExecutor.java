@@ -64,7 +64,7 @@ public class ScheduledTaskExecutor<T> implements Runnable {
         while (run) {
             try {
                 Task<T> firstAvailable = delayQueue.take();
-                //At that moment of execution can be added for example 100 new task with elapsed delay time!
+                //At that moment of execution can be added for example 100 new tasks with elapsed delay time.
                 //If so, priorityQueue comparator will place them at the end of the priority queue 
                 //according to their creation time.
                 delayQueue.drainTo(priorityQueue);

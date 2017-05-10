@@ -73,9 +73,9 @@ public class Task<T> implements Delayed {
     @Override
     public int compareTo(Delayed o) {
         if (this.getDelay(UNIT) > o.getDelay(UNIT)) {
-            return 2;
+            return 1;
         } else if (this.getDelay(UNIT) < o.getDelay(UNIT)) {
-            return -2;
+            return -1;
         } else {
             return 0;
         }
