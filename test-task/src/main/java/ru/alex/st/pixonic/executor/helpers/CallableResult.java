@@ -13,16 +13,28 @@ public class CallableResult {
 	private LocalDateTime scheduleTime;
 
 	private LocalDateTime finishTime;
+	
+	private LocalDateTime creationTime;
 
-	public CallableResult(String stringResult, int taskId, LocalDateTime scheduleTime, LocalDateTime startTime, LocalDateTime finishTime) {
+	public CallableResult(String stringResult, int taskId, LocalDateTime scheduleTime, LocalDateTime startTime, LocalDateTime finishTime, 
+	                LocalDateTime creationTime) {
 		this.stringResult = stringResult;
 		this.startTime = startTime;
 		this.finishTime = finishTime;
 		this.scheduleTime = scheduleTime;
 		this.taskId = taskId;
+		this.creationTime = creationTime;
 	}
 
-	public String getStringResult() {
+	public LocalDateTime getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(LocalDateTime creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    public String getStringResult() {
 		return stringResult;
 	}
 

@@ -2,73 +2,106 @@ package ru.alex.st.pixonic.executor;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ScheduledFuture;
 
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import junit.framework.Assert;
 import ru.alex.st.pixonic.executor.helpers.CallableResult;
-import ru.alex.st.pixonic.executor.helpers.TaskData;
 
 public class ScheduledTaskExecutorTest {
 
-	private ScheduledTaskExecutor<CallableResult> scheduledTaskExecutor;
+    private ScheduledTaskExecutor<CallableResult> scheduledTaskExecutor;
 
-	@BeforeClass
-	private void beforeClass() {
-		scheduledTaskExecutor = ScheduledTaskExecutor.startNewScheduledTaskExecutor();
-	}
+    @BeforeClass
+    private void beforeClass() {
+        scheduledTaskExecutor = ScheduledTaskExecutor.startNewExecutor(100);
+    }
 
-	@AfterClass
-	private void afterClass() {
-		scheduledTaskExecutor.stop();
-	}
+    @AfterClass
+    private void afterClass() throws InterruptedException {
+        scheduledTaskExecutor.stop();
+    }
 
+    //
+    // @Test(dataProvider = "taskDataProvider100", dataProviderClass =
+    // TaskDataProvider.class, threadPoolSize = 10)
+    // public void testConcurrentAdding(List<TaskData<CallableResult>> taskList)
+    // throws InterruptedException, ExecutionException {
+    // for (TaskData<CallableResult> task : taskList) {
+    // scheduledTaskExecutor.addTask(task.getLocalDateTime(),
+    // task.getCallable());
+    // }
+    // Thread.sleep(1000*60*2);
+    // LinkedList<CallableResult> resultList = new LinkedList<>();
+    // for (Future<CallableResult> result : scheduledTaskExecutor.getOutQueue())
+    // {
+    // resultList.add(result.get());
+    // }
+    // for (CallableResult result : resultList) {
+    // Assert.assertEquals(true,
+    // result.getScheduleTime().isBefore(result.getStartTime())
+    // || result.getScheduleTime().isEqual(result.getStartTime()));
+    // }
+    // }
 
-	@Test(dataProvider = "taskDataProvider100", dataProviderClass = TaskDataProvider.class, threadPoolSize = 10)
-	public void testConcurrentAdding(List<TaskData<CallableResult>> taskList)
-	                throws InterruptedException, ExecutionException {
-		for (TaskData<CallableResult> task : taskList) {
-			scheduledTaskExecutor.addTask(task.getLocalDateTime(), task.getCallable());
-		}
-		LinkedList<CallableResult> resultList = new LinkedList<>();
-		for (ScheduledFuture<CallableResult> future : scheduledTaskExecutor.getOutQueue()) {
-			resultList.add(future.get());
-		}
-		for (CallableResult result : resultList) {
-			Assert.assertEquals(true, result.getScheduleTime().isBefore(result.getStartTime())
-			                || result.getScheduleTime().isEqual(result.getStartTime()));
-		}
-	}
+    @Test(dataProvider = "taskDataProviderEqualTime100", dataProviderClass = TaskDataProvider.class)
+    public void testExecutionOrder(List<TaskData<CallableResult>> taskList)
+                    throws InterruptedException, ExecutionException {
+        final int taskNumber = taskList.size();
+        for (TaskData<CallableResult> task : taskList) {
+            scheduledTaskExecutor.addTask(task.getLocalDateTime(), task.getCallable());
+//            Thread.sleep(1);
+        }
+        LinkedList<CallableResult> resultList = new LinkedList<>();
+        BlockingQueue<CallableResult> outQueue = scheduledTaskExecutor.getOutQueue();
+        
+        int completedTasks = 0;
+        while(completedTasks < taskNumber) {
+            resultList.add(outQueue.take());
+            completedTasks++;
+        }
+        CallableResult previous = null;
+        resultList.sort((o1, o2) -> {
+            // return o1.getStartTime().compareTo(o2.getStartTime());
+            return o1.getTaskId().compareTo(o2.getTaskId());
+        });
+        for (CallableResult result : resultList) {
+            System.out.println(String.format("taskId:%s startTime:%s creationTime:%s scheduled:%s", result.getTaskId(),
+                            result.getStartTime(), result.getCreationTime(), result.getScheduleTime()));
+            if (previous != null)
+                Assert.assertEquals(true, result.getStartTime().isEqual(previous.getStartTime())
+                                || result.getStartTime().isAfter(previous.getStartTime()));
+            previous = result;
+        }
+    }
 
-	
-	//This test can sometimes fail
-	//@Test(dataProvider = "taskDataProviderEqualTime1000", dataProviderClass = TaskDataProvider.class)
-	public void testExecutionOrder(List<TaskData<CallableResult>> taskList)
-	                throws InterruptedException, ExecutionException {
-		for (TaskData<CallableResult> task : taskList) {
-			scheduledTaskExecutor.addTask(task.getLocalDateTime(), task.getCallable());
-		}
-		LinkedList<CallableResult> resultList = new LinkedList<>();
-		for (ScheduledFuture<CallableResult> future : scheduledTaskExecutor.getOutQueue()) {
-			resultList.add(future.get());
-		}
-		CallableResult previous = null;
-		resultList.sort((o1, o2) -> {
-			//return o1.getStartTime().compareTo(o2.getStartTime());
-			return o1.getTaskId().compareTo(o2.getTaskId());
-		});
-		for (CallableResult result : resultList) {
-			System.out.println(String.format("taskId:%s	startTime:%s	scheduled:%s", result.getTaskId(),
-			                result.getStartTime(), result.getScheduleTime()));
-			if (previous != null)
-				Assert.assertEquals(true, result.getStartTime().isEqual(previous.getStartTime()) 
-								|| result.getStartTime().isAfter(previous.getStartTime()));
-			previous = result;
-		}
-	}
+    // @Test
+    // public void testExecutionOrder() throws InterruptedException,
+    // ExecutionException {
+    // LocalDateTime now = LocalDateTime.now();
+    // LocalDateTime executionTime = LocalDateTime.of(LocalDate.now(),
+    // LocalTime.of(now.getHour(), now.getMinute(), now.getSecond() + 5,
+    // now.getNano()));
+    //
+    // LinkedList<Callable<CallableResult>> taskList = new LinkedList<>();
+    // taskList.add(new SimpleCallable(executionTime));
+    // taskList.add(new SimpleCallable(executionTime));
+    // taskList.add(new SimpleCallable(executionTime));
+    //
+    // for (Callable<CallableResult> callable : taskList) {
+    // scheduledTaskExecutor.addTask(executionTime, callable);
+    // Thread.sleep(200);
+    // }
+    // Thread.sleep(5000);
+    // LinkedList<CallableResult> resultList = new LinkedList<>();
+    // for (Future<CallableResult> result : scheduledTaskExecutor.getOutQueue())
+    // {
+    // resultList.add(result.get());
+    // }
+    // }
 
 }

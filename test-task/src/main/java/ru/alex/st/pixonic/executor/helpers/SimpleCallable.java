@@ -16,29 +16,44 @@ public class SimpleCallable implements Callable<CallableResult> {
 	private int taskId;
 
 	private LocalDateTime scheduledTime;
+	
+	private LocalDateTime creationTime;
 
-	public SimpleCallable(LocalDateTime dateTime) {
+	public SimpleCallable(LocalDateTime scheduled) {
 		this.taskId = counter.incrementAndGet();
-		this.scheduledTime = dateTime;
+		this.scheduledTime = scheduled;
 	}
 
 	@Override
 	public CallableResult call() throws Exception {
 		LocalDateTime start = LocalDateTime.now();
-		LOGGER.debug(String.format("[taskId:%s StartTime: %s, Scheduled:%s, currentAfterScheduled=%b]",
-		                taskId, start, scheduledTime, start.isAfter(scheduledTime)));
+		LOGGER.debug(String.format("[taskId:%s StartTime: %s, creationTime:%s, Scheduled:%s, currentAfterScheduled=%s]",
+		                taskId, start, creationTime, scheduledTime, start.isAfter(scheduledTime)));
 		try {
 			Thread.sleep((int) (Math.random() * 1000));
 //			Thread.sleep((int) (Math.random() * 0));
 		} catch (InterruptedException ex) {
+		    LOGGER.error(String.format("Thread with id = %s has finished", Thread.currentThread().getId()));
 			LOGGER.error(ex);
 		}
+		System.out.println(String.format("Thread with id = %s has finished", Thread.currentThread().getId()));
 		LOGGER.trace(String.format("Thread with id = %s has finished", Thread.currentThread().getId()));
-		CallableResult result = new CallableResult(String.format("Callable with id %s finished", taskId), taskId, scheduledTime, start, LocalDateTime.now());
+		CallableResult result = new CallableResult(String.format("Callable with id %s finished", taskId), taskId, scheduledTime, start, LocalDateTime.now(), creationTime);
 		return result;
 	}
+	
+	
+	
 
-	public int getTaskId() {
+	public LocalDateTime getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(LocalDateTime creationTime) {
+        this.creationTime = creationTime;
+    }
+
+    public int getTaskId() {
 		return taskId;
 	}
 

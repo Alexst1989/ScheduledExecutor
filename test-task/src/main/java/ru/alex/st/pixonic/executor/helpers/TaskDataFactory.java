@@ -3,6 +3,8 @@ package ru.alex.st.pixonic.executor.helpers;
 import java.time.LocalDateTime;
 import java.util.concurrent.Callable;
 
+import ru.alex.st.pixonic.executor.TaskData;
+
 public class TaskDataFactory {
 
 	/**

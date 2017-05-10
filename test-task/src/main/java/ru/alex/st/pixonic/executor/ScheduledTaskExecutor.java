@@ -1,15 +1,24 @@
 package ru.alex.st.pixonic.executor;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Queue;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import ru.alex.st.pixonic.Programm;
 
 /**
  * From documentation about ScheduledThreadPoolExecutor
@@ -24,35 +33,85 @@ import java.util.concurrent.TimeUnit;
  * @param <T>
  */
 
-public class ScheduledTaskExecutor<T> {
+public class ScheduledTaskExecutor<T> implements Runnable {
 
-	private ScheduledExecutorService scheduledExecutor;
+    private static final Logger LOGGER = LogManager.getLogger(Programm.class);
 
-	private Queue<ScheduledFuture<T>> outQueue = new LinkedBlockingQueue<>(); ;
+    private DelayQueue<Task<T>> delayQueue = new DelayQueue<>();
+    private PriorityBlockingQueue<Task<T>> priorityQueue = new PriorityBlockingQueue<>();
+    private boolean run = true;
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private LinkedBlockingQueue<T> outQueue = new LinkedBlockingQueue<>();
+    private AtomicInteger taskCounter = new AtomicInteger(0);
+    private int maxTasks;
+    private ReentrantLock lock = new ReentrantLock();
+    private Set<Thread> parentThreads = new HashSet<>();
 
-	private ScheduledTaskExecutor(ScheduledExecutorService scheduledExecutor) {
-		this.scheduledExecutor = scheduledExecutor;
-	}
+    private ScheduledTaskExecutor(int maxTasks) {
+        this.maxTasks = maxTasks;
+    }
 
-	public void addTask(LocalDateTime dateTime, Callable<T> callable) {
-		long delay = LocalDateTime.now().until(dateTime, ChronoUnit.NANOS);
-		outQueue.offer(scheduledExecutor.schedule(callable, delay, TimeUnit.NANOSECONDS));
-	}
+    public void addTask(LocalDateTime dateTime, Callable<T> callable) {
+//        lock.lock();
+//        try {
+            delayQueue.offer(new Task<>(dateTime, LocalDateTime.now(), callable));
+            parentThreads.add(Thread.currentThread());
+//        } finally {
+//            lock.unlock();
+//        }
+    }
 
-	public void stop() {
-		scheduledExecutor.shutdown();
-	}
+    public void addTask(Task<T> task) {
+        lock.lock();
+        try {
+            delayQueue.offer(task);
+        } finally {
+            lock.unlock();
+        }
+    }
 
-	public static <E> ScheduledTaskExecutor<E> startNewScheduledTaskExecutor() {
-		int poolSize = Runtime.getRuntime().availableProcessors() * 3;
-		ScheduledThreadPoolExecutor executor = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(poolSize);
-		executor.prestartAllCoreThreads();
-		ScheduledTaskExecutor<E> scheduledExecutor = new ScheduledTaskExecutor<E>(executor);
-		return scheduledExecutor;
-	}
-	
-	public Queue<ScheduledFuture<T>> getOutQueue() {
-		return outQueue;
-	}
+    public static <T> ScheduledTaskExecutor<T> startNewExecutor(int maxTasks) {
+        ScheduledTaskExecutor<T> executor = new ScheduledTaskExecutor<>(maxTasks);
+        Thread t = new Thread(executor);
+        t.start();
+        return executor;
+    }
+
+    public void stop() {
+        run = false;
+        executor.shutdown();
+        LOGGER.info("Main executor {} is shut down", executor);
+    }
+
+    @Override
+    public void run() {
+        while (run && taskCounter.getAndIncrement() < maxTasks) {
+            lock.lock();
+            try {
+                Task<T> firstAvailable = delayQueue.take();
+                delayQueue.drainTo(priorityQueue);
+                priorityQueue.offer(firstAvailable);
+                while (priorityQueue.size() > 0) {
+                    LOGGER.trace("task:{} priorityQueue.size:{}", priorityQueue.peek(), priorityQueue.size());
+                    Future<T> future = executor.submit(priorityQueue.poll().getCallable());
+                    outQueue.add(future.get());
+                }
+            } catch (InterruptedException | ExecutionException ex) {
+                LOGGER.error(ex);
+            } finally {
+                if (lock.isLocked())
+                    lock.unlock();
+            }
+
+        }
+    }
+
+    public int getTaskNumber() {
+        return delayQueue.size();
+    }
+
+    public BlockingQueue<T> getOutQueue() {
+        return outQueue;
+    }
 
 }

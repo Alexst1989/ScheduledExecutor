@@ -1,16 +1,22 @@
 package ru.alex.st.pixonic;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import ru.alex.st.pixonic.executor.ScheduledTaskExecutor;
+import ru.alex.st.pixonic.executor.TaskData;
 import ru.alex.st.pixonic.executor.helpers.CallableResult;
-import ru.alex.st.pixonic.executor.helpers.TaskData;
+import ru.alex.st.pixonic.executor.helpers.SimpleCallable;
 import ru.alex.st.pixonic.executor.helpers.TaskDataFactory;
 
 /*
@@ -37,32 +43,19 @@ public class Programm {
 	private static final Logger LOGGER = LogManager.getLogger(Programm.class);
 
 	public static void main(String args[]) throws InterruptedException, ExecutionException {
-		
-		//Создание пула
-		ScheduledTaskExecutor<CallableResult> executor = ScheduledTaskExecutor.startNewScheduledTaskExecutor();
-
-		//Добавление пар LocalDateTime, Callable
-		TaskData<CallableResult> task1 = TaskDataFactory.getRandomTaskForMinute();
-		TaskData<CallableResult> task2 = TaskDataFactory.getRandomTaskForMinute();
-		TaskData<CallableResult> task3 = TaskDataFactory.getRandomTaskForMinute();
-
-		executor.addTask(task1.getLocalDateTime(), task1.getCallable());
-		executor.addTask(task2.getLocalDateTime(), task2.getCallable());
-		executor.addTask(task3.getLocalDateTime(), task3.getCallable());
-
-		//Вывод результатов выполнения заданий
-		Queue<ScheduledFuture<CallableResult>> outQueue = executor.getOutQueue(); 
-		LinkedList<CallableResult> results = new LinkedList<>();
-		while (!outQueue.isEmpty()) {
-			ScheduledFuture<CallableResult> future = outQueue.poll();
-			results.add(future.get());
-			
-		}
-		for(CallableResult result : results) {
-			LOGGER.info(result.getStringResult());
-		}
-		
-		executor.stop();
+//	    ScheduledTaskExecutor<CallableResult> scheduledTaskExecutor2 = ScheduledTaskExecutor.startNewExecutor(100);
+//        LocalDateTime now = LocalDateTime.now();
+//        LocalDateTime executionTime = LocalDateTime.of(LocalDate.now(),
+//                        LocalTime.of(now.getHour(), now.getMinute(), now.getSecond() + 5, now.getNano()));
+//
+//        LinkedList<Callable<CallableResult>> taskList = new LinkedList<>();
+//        taskList.add(new SimpleCallable(executionTime));
+//        taskList.add(new SimpleCallable(executionTime));
+//        taskList.add(new SimpleCallable(executionTime));
+//
+//        for (Callable<CallableResult> callable : taskList) {
+//            scheduledTaskExecutor2.addTask(executionTime, callable);
+//        }
 	}
 	
 }
