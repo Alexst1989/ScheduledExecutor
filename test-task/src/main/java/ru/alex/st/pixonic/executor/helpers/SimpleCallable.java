@@ -1,6 +1,7 @@
 package ru.alex.st.pixonic.executor.helpers;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -18,6 +19,8 @@ public class SimpleCallable implements Callable<CallableResult> {
 	private LocalDateTime scheduledTime;
 	
 	private LocalDateTime creationTime;
+	
+	private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss:nnnnnnnnn");
 
 	public SimpleCallable(LocalDateTime scheduled) {
 		this.taskId = counter.incrementAndGet();
@@ -28,7 +31,8 @@ public class SimpleCallable implements Callable<CallableResult> {
 	public CallableResult call() throws Exception {
 		LocalDateTime start = LocalDateTime.now();
 		LOGGER.debug(String.format("[taskId:%s StartTime: %s, creationTime:%s, Scheduled:%s, currentAfterScheduled=%s]",
-		                taskId, start, creationTime, scheduledTime, start.isAfter(scheduledTime)));
+		                taskId, formatter.format(start), formatter.format(creationTime), 
+		                                formatter.format(scheduledTime), start.isAfter(scheduledTime)));
 		try {
 			Thread.sleep((int) (Math.random() * 100));
 		} catch (InterruptedException ex) {

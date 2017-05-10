@@ -40,7 +40,7 @@ public class Programm {
 	    ScheduledTaskExecutor<CallableResult> scheduledTaskExecutor = ScheduledTaskExecutor.startNewExecutor();
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime executionTime = LocalDateTime.of(LocalDate.now(),
-                        LocalTime.of(now.getHour(), now.getMinute(), now.getSecond() + 5, now.getNano()));
+                        LocalTime.of(now.getHour(), now.getMinute(), (now.getSecond() < 54) ? now.getSecond() + 5 : now.getSecond(), now.getNano()));
 
         LinkedList<Callable<CallableResult>> taskList = new LinkedList<>();
         taskList.add(new SimpleCallable(executionTime));
