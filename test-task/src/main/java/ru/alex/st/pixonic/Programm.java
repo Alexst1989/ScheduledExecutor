@@ -1,9 +1,18 @@
 package ru.alex.st.pixonic;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.LinkedList;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import ru.alex.st.pixonic.executor.ScheduledTaskExecutor;
+import ru.alex.st.pixonic.executor.helpers.CallableResult;
+import ru.alex.st.pixonic.executor.helpers.SimpleCallable;
 
 /*
  * Условие:
@@ -14,14 +23,7 @@ import org.apache.logging.log4j.Logger;
  * в произвольном порядке и добавление новых пар (LocalDateTime, Callable) может вызываться из разных потоков.
  * 
  * Реализация:
- * Условие задачи "Задачи должны выполняться в порядке прихода события для равных LocalDateTime"
- * выполнено с точностью до момента передачи задания из DelayedWorkQueue в потоки выполнения (Worker) 
- * в ScheduledThreadPoolExecutor. Очередь DelayedWorkQueue гарантирует порядок передачи FIFO для заданий с равным
- * временем выполенения в поток, который его будет выполнять. Однако, порядок начала выполнения этих 
- * заданий в потоках пула после передачи из очереди не гарантируется.
- * 
- * Остальные условия задачи выполнены полностью.
- *
+ * Новые задания поступают в DelayQueue. Момент прихода задания фиксируется
  */
 
 public class Programm {
@@ -29,19 +31,19 @@ public class Programm {
 	private static final Logger LOGGER = LogManager.getLogger(Programm.class);
 
 	public static void main(String args[]) throws InterruptedException, ExecutionException {
-//	    ScheduledTaskExecutor<CallableResult> scheduledTaskExecutor2 = ScheduledTaskExecutor.startNewExecutor(100);
-//        LocalDateTime now = LocalDateTime.now();
-//        LocalDateTime executionTime = LocalDateTime.of(LocalDate.now(),
-//                        LocalTime.of(now.getHour(), now.getMinute(), now.getSecond() + 5, now.getNano()));
-//
-//        LinkedList<Callable<CallableResult>> taskList = new LinkedList<>();
-//        taskList.add(new SimpleCallable(executionTime));
-//        taskList.add(new SimpleCallable(executionTime));
-//        taskList.add(new SimpleCallable(executionTime));
-//
-//        for (Callable<CallableResult> callable : taskList) {
-//            scheduledTaskExecutor2.addTask(executionTime, callable);
-//        }
+	    ScheduledTaskExecutor<CallableResult> scheduledTaskExecutor = ScheduledTaskExecutor.startNewExecutor();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime executionTime = LocalDateTime.of(LocalDate.now(),
+                        LocalTime.of(now.getHour(), now.getMinute(), now.getSecond() + 5, now.getNano()));
+
+        LinkedList<Callable<CallableResult>> taskList = new LinkedList<>();
+        taskList.add(new SimpleCallable(executionTime));
+        taskList.add(new SimpleCallable(executionTime));
+        taskList.add(new SimpleCallable(executionTime));
+
+        for (Callable<CallableResult> callable : taskList) {
+            scheduledTaskExecutor.addTask(executionTime, callable);
+        }
 	}
 	
 }

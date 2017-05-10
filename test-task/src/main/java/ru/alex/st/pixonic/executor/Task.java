@@ -8,21 +8,14 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import ru.alex.st.pixonic.Programm;
-
-public class Task<T> implements DelayedWithCreationTime {
+public class Task<T> implements Delayed {
 
     private static HashMap<TimeUnit, ChronoUnit> convertMap = new HashMap<>();
-    
-    private static final Logger LOGGER = LogManager.getLogger(Programm.class);
 
     private static final TimeUnit UNIT = TimeUnit.NANOSECONDS;
-    
+
     private static final AtomicInteger atomicTaskCounter = new AtomicInteger(0);
-    
+
     private int taskId;
 
     static {
@@ -48,7 +41,6 @@ public class Task<T> implements DelayedWithCreationTime {
         this.taskId = atomicTaskCounter.incrementAndGet();
     }
 
-    @Override
     public LocalDateTime getCreationTime() {
         return creationTime;
     }
@@ -80,33 +72,19 @@ public class Task<T> implements DelayedWithCreationTime {
 
     @Override
     public int compareTo(Delayed o) {
-        if (o instanceof DelayedWithCreationTime) {
-            DelayedWithCreationTime other = (DelayedWithCreationTime) o;
-            if (this.getDelay(UNIT) > o.getDelay(UNIT)) {
-                return 2;
-            } else if (this.getDelay(UNIT) < o.getDelay(UNIT)) {
-                return -2;
-            } else if (this.getCreationTime().isAfter(other.getCreationTime())) {
-                return 1;
-            } else if (this.getCreationTime().isBefore(other.getCreationTime())) {
-                return -1;
-            } else {
-                return 0;
-            }
+        if (this.getDelay(UNIT) > o.getDelay(UNIT)) {
+            return 2;
+        } else if (this.getDelay(UNIT) < o.getDelay(UNIT)) {
+            return -2;
         } else {
-            if (this.getDelay(UNIT) > o.getDelay(UNIT)) {
-                return 2;
-            } else if (this.getDelay(UNIT) < o.getDelay(UNIT)) {
-                return -2;
-            } else {
-                return 0;
-            }
+            return 0;
         }
     }
-    
+
     @Override
     public String toString() {
-        return String.format("Task Id = %s, CreationTime = %s, ExecutionTime = %s", taskId, creationTime, executionTime);
+        return String.format("Task Id = %s, CreationTime = %s, ExecutionTime = %s", taskId, creationTime,
+                        executionTime);
     }
 
 }
