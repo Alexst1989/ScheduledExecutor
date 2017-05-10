@@ -81,8 +81,10 @@ public class ScheduledTaskExecutor<T> implements Runnable {
                     Future<T> future = executor.submit(call);
                     outQueue.add(future.get());
                 }
-            } catch (InterruptedException | ExecutionException ex) {
+            } catch (ExecutionException ex) {
                 LOGGER.error(ex);
+            } catch (InterruptedException ex) {
+                LOGGER.info("Thread was stopped");
             }
         }
     }
